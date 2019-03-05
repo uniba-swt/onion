@@ -40,6 +40,8 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <libgen.h>
+#include <stdlib.h>
+
 
 struct onion_webdav_t {
   char *path;

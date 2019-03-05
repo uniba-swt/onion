@@ -13,7 +13,9 @@ set(SOURCES onion.c codecs.c dict.c low.c request.c response.c handler.c log.c s
 	)
 
 set(LIBRARIES)
-LIST(APPEND LIBRARIES rt)
+if (UNIX AND NOT APPLE)
+	LIST(APPEND LIBRARIES rt)
+endif()
 
 ## optional add sources and libraries depeding on features
 

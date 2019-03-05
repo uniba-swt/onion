@@ -24,6 +24,7 @@
 #ifndef __WEBDAV_H__
 #define __WEBDAV_H__
 #include <onion/handler.h>
+#include <alloca.h>
 
 /// Typedef with the signature of the permission checker.
 typedef int (*onion_webdav_permissions_check) (const char *exported_path,

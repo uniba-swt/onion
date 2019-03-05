@@ -32,7 +32,7 @@
 
 struct onion_poller_t {
   struct event_base *base;
-  sem_t sem;
+  sem_t *sem;
   volatile int stop;
 };
 
@@ -81,7 +81,7 @@ void onion_poller_slot_set_timeout(onion_poller_slot * el, int timeout_ms) {
 }
 
 /// Sets the polling type: read/write/other. O_POLL_READ | O_POLL_WRITE | O_POLL_OTHER
-void onion_poller_slot_set_type(onion_poller_slot * el, int type) {
+void onion_poller_slot_set_type(onion_poller_slot * el, onion_poller_slot_type_e type) {
   el->type = EV_PERSIST;
   if (type & O_POLL_READ)
     el->type |= EV_READ;
@@ -95,12 +95,15 @@ onion_poller *onion_poller_new(int aprox_n) {
 
   onion_poller *ret = onion_low_calloc(1, sizeof(onion_poller));
   ret->base = event_base_new();
-  sem_init(&ret->sem, 0, 1);
+  ret->sem = sem_open("/poller", O_CREAT, 0, 1);
   return ret;
 }
 
 /// Frees the poller. It first stops it.
 void onion_poller_free(onion_poller * p) {
+  sem_close(p->sem);
+  sem_unlink("/poller");
+  
   event_base_free(p->base);
   onion_low_free(p);
 }
@@ -143,9 +146,9 @@ onion_poller_slot *onion_poller_get(onion_poller * poller, int fd) {
 void onion_poller_poll(onion_poller * poller) {
   poller->stop = 0;
   while (!poller->stop) {
-    sem_wait(&poller->sem);
+    sem_wait(poller->sem);
     event_base_loop(poller->base, EVLOOP_ONCE);
-    sem_post(&poller->sem);
+    sem_post(poller->sem);
   }
 }
 

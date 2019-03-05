@@ -22,6 +22,7 @@
 */
 
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <libgen.h>
 #include <fcntl.h>

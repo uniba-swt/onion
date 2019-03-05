@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdbool.h>
+#include <strings.h>
 #include "types.h"
 
 #ifdef __cplusplus

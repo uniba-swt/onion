@@ -30,6 +30,8 @@ extern "C" {
 
 #include <stddef.h>
 #include <stdarg.h>
+#include <strings.h>
+#include <alloca.h>
 #include "types.h"
 
 /// Get the current websocket handler, or create it. If not a websocket request, returns NULL

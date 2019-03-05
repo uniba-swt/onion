@@ -26,6 +26,7 @@
 
 #include "types.h"
 #include <stddef.h>
+#include <strings.h>
 
 #ifdef __cplusplus
 extern "C" {

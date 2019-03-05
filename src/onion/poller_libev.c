@@ -31,7 +31,7 @@
 
 struct onion_poller_t {
   struct ev_loop *loop;
-  sem_t sem;
+  sem_t *sem;
   volatile int stop;
 };
 
@@ -79,7 +79,7 @@ void onion_poller_slot_set_timeout(onion_poller_slot * el, int timeout_ms) {
 }
 
 /// Sets the polling type: read/write/other. O_POLL_READ | O_POLL_WRITE | O_POLL_OTHER
-void onion_poller_slot_set_type(onion_poller_slot * el, int type) {
+void onion_poller_slot_set_type(onion_poller_slot * el, onion_poller_slot_type_e type) {
   el->type = 0;
   if (type & O_POLL_READ)
     el->type |= EV_READ;
@@ -89,14 +89,20 @@ void onion_poller_slot_set_type(onion_poller_slot * el, int type) {
 
 /// Create a new poller
 onion_poller *onion_poller_new(int aprox_n) {
+  // Make sure the semaphore of the last onion session is no longer in the system
+  sem_unlink("/poller");
+
   onion_poller *ret = onion_low_calloc(1, sizeof(onion_poller));
   ret->loop = ev_default_loop(0);
-  sem_init(&ret->sem, 0, 1);
+  ret->sem = sem_open("/poller", O_CREAT, 0, 1);
   return ret;
 }
 
 /// Frees the poller. It first stops it.
 void onion_poller_free(onion_poller * p) {
+  sem_close(p->sem);
+  sem_unlink("/poller");
+  
   onion_low_free(p);
 }
 
@@ -161,9 +167,9 @@ void onion_poller_poll(onion_poller * poller) {
 
   poller->stop = 0;
   while (!poller->stop) {
-    sem_wait(&poller->sem);
+    sem_wait(poller->sem);
     ev_run(poller->loop, EVLOOP_ONESHOT);
-    sem_post(&poller->sem);
+    sem_post(poller->sem);
   }
 }
 
