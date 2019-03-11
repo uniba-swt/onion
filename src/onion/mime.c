@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include "types.h"
 #include "mime.h"
@@ -87,7 +89,7 @@ const char *onion_mime_get(const char *filename) {
 }
 
 /**
- * @short Reads the /etc/mime.types file
+ * @short Reads the /etc/mime.types or ./mime.types file
  * @ingroup mime
  *
  *
@@ -99,15 +101,22 @@ static void onion_mime_fill() {
 
   FILE *fd = fopen("/etc/mime.types", "rt");
   if (!fd) {
-    ONION_WARNING
-        ("Could not read MIME types (etc/mime.types), returned mime types may be incorrect. Adding minimal set.");
-    onion_dict_add(onion_mime_dict, "html", "text/html", 0);
-    onion_dict_add(onion_mime_dict, "htm", "text/html", 0);
-    onion_dict_add(onion_mime_dict, "js", "application/javascript", 0);
-    onion_dict_add(onion_mime_dict, "css", "text/css", 0);
-    onion_dict_add(onion_mime_dict, "png", "image/png", 0);
-    onion_dict_add(onion_mime_dict, "jpg", "image/jpeg", 0);
-    return;
+    // Read a local copy of the mime.types file
+    char mime_path[PATH_MAX + 1] = __FILE__;
+    mime_path[strlen(mime_path) - 1] = '\0';
+    strcat(mime_path, "types");
+    fd = fopen(mime_path, "rt");
+    if (!fd) {
+      ONION_WARNING
+          ("Could not read MIME types (./mime.types), returned mime types may be incorrect. Adding minimal set.");
+      onion_dict_add(onion_mime_dict, "html", "text/html", 0);
+      onion_dict_add(onion_mime_dict, "htm", "text/html", 0);
+      onion_dict_add(onion_mime_dict, "js", "application/javascript", 0);
+      onion_dict_add(onion_mime_dict, "css", "text/css", 0);
+      onion_dict_add(onion_mime_dict, "png", "image/png", 0);
+      onion_dict_add(onion_mime_dict, "jpg", "image/jpeg", 0);
+      return;
+    }
   }
   char mimetype[128];
   char extension[8];
