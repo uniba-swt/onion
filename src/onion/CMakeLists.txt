@@ -17,7 +17,7 @@ if (UNIX AND NOT APPLE)
 	LIST(APPEND LIBRARIES rt)
 endif()
 
-## optional add sources and libraries depeding on features
+## optional add sources and libraries depending on features
 
 # Poller can be a bit more complex, but basically the same.
 if (${ONION_POLLER} STREQUAL libevent)

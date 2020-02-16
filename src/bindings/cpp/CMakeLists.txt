@@ -1,13 +1,13 @@
 SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++0x")
 
-include_directories (${PROJECT_SOURCE_DIR}/src/)
-
-add_library(onioncpp SHARED dict.cpp handler.cpp extrahandlers.cpp url.cpp shortcuts.cpp exceptions.cpp)
-add_library(onioncpp_static STATIC dict.cpp handler.cpp extrahandlers.cpp url.cpp shortcuts.cpp exceptions.cpp)
+include_directories(${PROJECT_SOURCE_DIR}/src/)
 
 set(INCLUDES_ONIONCPP onion.hpp dict.hpp request.hpp response.hpp url.hpp handler.hpp extrahandlers.hpp shortcuts.hpp exceptions.hpp listen_point.hpp http.hpp https.hpp mime.hpp)
 
 MESSAGE(STATUS "Found include files ${INCLUDES_ONIONCPP}")
+
+add_library(onioncpp SHARED dict.cpp handler.cpp extrahandlers.cpp url.cpp shortcuts.cpp exceptions.cpp)
+add_library(onioncpp_static STATIC dict.cpp handler.cpp extrahandlers.cpp url.cpp shortcuts.cpp exceptions.cpp)
 
 SET_TARGET_PROPERTIES(onioncpp onioncpp_static
 	PROPERTIES
