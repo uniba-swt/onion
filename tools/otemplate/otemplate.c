@@ -46,7 +46,7 @@ int work(const char *infilename, const char *outfilename,
 void help(const char *msg);
 
 int main(int argc, char **argv) {
-  // Add some plugin searhc paths
+  // Add some plugin search paths
   plugin_search_path = list_new(free);
 
   const char *infilename = NULL;
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
         help("Missing templatedir name");
         return 3;
       }
-      snprintf(tmp, sizeof(tmp), "%s/lib%%s.so", argv[i]);
+      snprintf(tmp, sizeof(tmp), "%s/lib%%s.dylib", argv[i]);
       ONION_DEBUG("Added templatedir %s", tmp);
       list_add(plugin_search_path, strdup(tmp));        // dup, remember to free later.
     } else if ((strcmp(argv[i], "--no-orig-lines") == 0)
@@ -107,29 +107,29 @@ int main(int argc, char **argv) {
   } else {
     char tmp2[256];
     strncpy(tmp2, argv[1], sizeof(tmp2) - 1);
-    snprintf(tmp, sizeof(tmp), "%s/lib%%s.so", dirname(tmp2));
+    snprintf(tmp, sizeof(tmp), "%s/lib%%s.dylib", dirname(tmp2));
     list_add(plugin_search_path, strdup(tmp));
     strncpy(tmp2, argv[1], sizeof(tmp2) - 1);
-    snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.so", dirname(tmp2));
+    snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.dylib", dirname(tmp2));
     list_add(plugin_search_path, strdup(tmp));
   }
 
   // Default template dirs
-  list_add_with_flags(plugin_search_path, "lib%s.so", LIST_ITEM_NO_FREE);
-  list_add_with_flags(plugin_search_path, "templatetags/lib%s.so",
+  list_add_with_flags(plugin_search_path, "lib%s.dylib", LIST_ITEM_NO_FREE);
+  list_add_with_flags(plugin_search_path, "templatetags/lib%s.dylib",
                       LIST_ITEM_NO_FREE);
   char tmp2[256];
   strncpy(tmp2, argv[0], sizeof(tmp2) - 1);
-  snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.so", dirname(tmp2));
+  snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.dylib", dirname(tmp2));
   list_add(plugin_search_path, strdup(tmp));    // dupa is ok, as im at main.
   strncpy(tmp2, argv[0], sizeof(tmp2) - 1);
-  snprintf(tmp, sizeof(tmp), "%s/lib%%s.so", dirname(tmp2));
+  snprintf(tmp, sizeof(tmp), "%s/lib%%s.dylib", dirname(tmp2));
   list_add(plugin_search_path, strdup(tmp));    // dupa is ok, as im at main.
   list_add_with_flags(plugin_search_path,
-                      "/usr/local/lib/otemplate/templatetags/lib%s.so",
+                      "/usr/local/lib/otemplate/templatetags/lib%s.dylib",
                       LIST_ITEM_NO_FREE);
   list_add_with_flags(plugin_search_path,
-                      "/usr/lib/otemplate/templatetags/lib%s.so",
+                      "/usr/lib/otemplate/templatetags/lib%s.dylib",
                       LIST_ITEM_NO_FREE);
 
   onion_assets_file *assetsfile = onion_assets_file_new(assetfilename);
@@ -155,7 +155,7 @@ void help(const char *msg) {
           "  <infilename>                Input filename or '-' to use stdin.\n"
           "  <outfilename>               Output filename or '-' to use stdout.\n"
           "\n"
-          "Templatetags plugins are search in this order, always libPLUGIN.so, where PLUGIN is the plugin name:\n"
+          "Templatetags plugins are search in this order, always libPLUGIN.dylib, where PLUGIN is the plugin name:\n"
           "   1. Set by command line with --templatetagsdir or -t\n"
           "   2. At <infilename directory>, and at <infilename directory>/templatetags\n"
           "   3. Current directory (.), and ./templatetags\n"
