@@ -20,7 +20,7 @@
   <http://www.gnu.org/licenses/> and
   <http://www.apache.org/licenses/LICENSE-2.0>.
 */
-#define GC_THREADS 1
+#define GC_THREADS
 
 #include <gc.h>
 
@@ -67,9 +67,15 @@ int main(int argc, char **argv) {
   onion_low_initialize_memory_allocation(GC_malloc, GC_malloc_atomic, GC_calloc,
                                          GC_realloc, GC_strdup, GC_free,
                                          memory_allocation_error);
+#if __APPLE__
+  onion_low_initialize_threads(pthread_create, pthread_join,
+                               pthread_cancel, pthread_detach,
+                               pthread_exit, pthread_sigmask);
+#else
   onion_low_initialize_threads(GC_pthread_create, GC_pthread_join,
                                GC_pthread_cancel, GC_pthread_detach,
                                GC_pthread_exit, GC_pthread_sigmask);
+#endif
 
   signal(SIGINT, shutdown_server);
   signal(SIGTERM, shutdown_server);
