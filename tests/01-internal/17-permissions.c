@@ -37,7 +37,11 @@ static bool t01_failed;
 
 void t01_listen_port_error_handler(onion_log_level level, const char *filename,
                                    int lineno, const char *fmt, ...) {
+#if __APPLE__
+  if (level == O_ERROR && errno == EBADF) {
+#else
   if (level == O_ERROR && (errno == EBADF || errno == EDOTDOT)) {
+#endif
     if (!t01_failed) {
       t01_failed = true;
       onion_listen_stop(t01_server);
