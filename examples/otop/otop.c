@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
   onion_url *withauth = onion_url_new();
   onion_url_add(withauth, "^ps/$", otop_handler);
   onion_url_add_handler(withauth, "^static/",
-                        onion_handler_export_local_new("."));
+                        onion_handler_export_local_new("/tmp/"));
   onion_url_add(withauth, "", otop_index);
 
   onion_handler *otop = onion_handler_auth_pam("Onion Top", "login",

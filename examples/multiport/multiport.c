@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
   o = onion_new(O_THREADED);
   signal(SIGINT, free_onion);
 
-  onion_set_root_handler(o, onion_handler_export_local_new("."));
+  onion_set_root_handler(o, onion_handler_export_local_new("/tmp/"));
   onion_add_listen_point(o, "localhost", "8080", onion_http_new());
   onion_add_listen_point(o, "localhost", "8081", onion_http_new());
 #ifdef HAVE_GNUTLS
