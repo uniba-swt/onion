@@ -261,7 +261,7 @@ static void onion_dict_set_node_data(onion_dict_node_data * data,
                                      const char *key, const void *value,
                                      int flags) {
   //ONION_DEBUG("Set data %02X",flags);
-  if ((flags & OD_DUP_KEY) == OD_DUP_KEY)       // not enought with flag, as its a multiple bit flag, with FREE included
+  if ((flags & OD_DUP_KEY) == OD_DUP_KEY)       // not enough with flag, as it's a multiple bit flag, with FREE included
     data->key = onion_low_strdup(key);
   else
     data->key = key;
@@ -787,6 +787,7 @@ static onion_dict *onion_dict_from_json_(const char **_data) {
       }
       onion_dict_add(ret, onion_block_data(key), onion_block_data(value),
                      OD_DUP_ALL);
+      onion_block_clear(value);
     } else if (*data == '"') {  // parse string
       ssize_t read_bytes = onion_json_unquote_add(value, data);
       if (read_bytes < 0)

@@ -21,6 +21,10 @@
   <http://www.apache.org/licenses/LICENSE-2.0>.
 */
 
+#if __APPLE__
+  #define _DARWIN_C_SOURCE
+#endif
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +33,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <onion/mime.h>
+#include <onion/utils.h>
 
 #include "../common/updateassets.h"
 
@@ -91,7 +96,7 @@ int main(int argc, char **argv) {
       struct stat st;
       stat(argv[i], &st);
       if (S_ISDIR(st.st_mode)) {
-        parse_directory(basename(argv[1]), argv[i], outfd, assets);
+        parse_directory(onion_basename(argv[1]), argv[i], outfd, assets);
       } else {
         parse_file("", argv[i], outfd, assets);
       }

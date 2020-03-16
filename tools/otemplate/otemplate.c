@@ -32,6 +32,7 @@
 
 #include "onion/log.h"
 #include "onion/block.h"
+#include "onion/utils.h"
 #include "list.h"
 #include "parser.h"
 #include "tags.h"
@@ -39,13 +40,19 @@
 
 list *plugin_search_path;
 
+#if __APPLE__
+  const char dylib_extension[] = "dylib";
+#else
+  const char dylib_extension[] = "so";
+#endif
+
 int work(const char *infilename, const char *outfilename,
          onion_assets_file * assets);
 
 void help(const char *msg);
 
 int main(int argc, char **argv) {
-  // Add some plugin searhc paths
+  // Add some plugin search paths
   plugin_search_path = list_new(free);
 
   const char *infilename = NULL;
@@ -65,7 +72,7 @@ int main(int argc, char **argv) {
         help("Missing templatedir name");
         return 3;
       }
-      snprintf(tmp, sizeof(tmp), "%s/lib%%s.so", argv[i]);
+      snprintf(tmp, sizeof(tmp), "%s/lib%%s.%s", argv[i], dylib_extension);
       ONION_DEBUG("Added templatedir %s", tmp);
       list_add(plugin_search_path, strdup(tmp));        // dup, remember to free later.
     } else if ((strcmp(argv[i], "--no-orig-lines") == 0)
@@ -106,30 +113,46 @@ int main(int argc, char **argv) {
   } else {
     char tmp2[256];
     strncpy(tmp2, argv[1], sizeof(tmp2) - 1);
-    snprintf(tmp, sizeof(tmp), "%s/lib%%s.so", dirname(tmp2));
+    snprintf(tmp, sizeof(tmp), "%s/lib%%s.%s", dirname(tmp2), dylib_extension);
     list_add(plugin_search_path, strdup(tmp));
     strncpy(tmp2, argv[1], sizeof(tmp2) - 1);
-    snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.so", dirname(tmp2));
+    snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.%s", dirname(tmp2), dylib_extension);
     list_add(plugin_search_path, strdup(tmp));
   }
 
   // Default template dirs
+#if __APPLE__
+  list_add_with_flags(plugin_search_path, "lib%s.dylib", LIST_ITEM_NO_FREE);
+  list_add_with_flags(plugin_search_path, "templatetags/lib%s.dylib",
+                      LIST_ITEM_NO_FREE);
+#else
   list_add_with_flags(plugin_search_path, "lib%s.so", LIST_ITEM_NO_FREE);
   list_add_with_flags(plugin_search_path, "templatetags/lib%s.so",
                       LIST_ITEM_NO_FREE);
+#endif
   char tmp2[256];
   strncpy(tmp2, argv[0], sizeof(tmp2) - 1);
-  snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.so", dirname(tmp2));
+  snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.%s", dirname(tmp2), dylib_extension);
   list_add(plugin_search_path, strdup(tmp));    // dupa is ok, as im at main.
   strncpy(tmp2, argv[0], sizeof(tmp2) - 1);
-  snprintf(tmp, sizeof(tmp), "%s/lib%%s.so", dirname(tmp2));
+  snprintf(tmp, sizeof(tmp), "%s/lib%%s.%s", dirname(tmp2), dylib_extension);
   list_add(plugin_search_path, strdup(tmp));    // dupa is ok, as im at main.
+
+#if __APPLE__
+  list_add_with_flags(plugin_search_path,
+                      "/usr/local/lib/otemplate/templatetags/lib%s.dylib",
+                      LIST_ITEM_NO_FREE);
+  list_add_with_flags(plugin_search_path,
+                      "/usr/lib/otemplate/templatetags/lib%s.dylib",
+                      LIST_ITEM_NO_FREE);
+#else
   list_add_with_flags(plugin_search_path,
                       "/usr/local/lib/otemplate/templatetags/lib%s.so",
                       LIST_ITEM_NO_FREE);
   list_add_with_flags(plugin_search_path,
                       "/usr/lib/otemplate/templatetags/lib%s.so",
                       LIST_ITEM_NO_FREE);
+#endif
 
   onion_assets_file *assetsfile = onion_assets_file_new(assetfilename);
   int error = work(infilename, outfilename, assetsfile);
@@ -154,7 +177,7 @@ void help(const char *msg) {
           "  <infilename>                Input filename or '-' to use stdin.\n"
           "  <outfilename>               Output filename or '-' to use stdout.\n"
           "\n"
-          "Templatetags plugins are search in this order, always libPLUGIN.so, where PLUGIN is the plugin name:\n"
+          "Templatetags plugins are search in this order, always libPLUGIN.dylib, where PLUGIN is the plugin name:\n"
           "   1. Set by command line with --templatetagsdir or -t\n"
           "   2. At <infilename directory>, and at <infilename directory>/templatetags\n"
           "   3. Current directory (.), and ./templatetags\n"
@@ -181,7 +204,7 @@ int work(const char *infilename, const char *outfilename,
   status.infilename = infilename;
   char tmp2[256];
   strncpy(tmp2, infilename, sizeof(tmp2) - 1);
-  const char *tname = basename(tmp2);
+  const char *tname = onion_basename(tmp2);
   ONION_DEBUG("Create init function on top, tname %s", tname);
   status.blocks_init = function_new(&status, "%s_blocks_init", tname);
   status.blocks_init->signature = "onion_dict *context";

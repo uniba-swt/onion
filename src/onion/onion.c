@@ -148,6 +148,7 @@ onion_url_add_url(url, ...); // Nesting
 #include <string.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <syslog.h>
 
 //#define HAVE_PTHREADS
 #ifdef HAVE_PTHREADS

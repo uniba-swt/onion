@@ -44,7 +44,7 @@ void free_onion(int unused) {
 
 int main(int argc, char **argv) {
   char *port = "8080";
-  const char *dirname = ".";
+  const char *dirname = "/tmp/";
   int i;
   for (i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-p") == 0) {

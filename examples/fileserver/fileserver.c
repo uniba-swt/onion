@@ -84,7 +84,7 @@ int show_help() {
          "Usage: fileserver [options] [directory to serve]\n\n"
          "Options:\n"
          "  --pem pemfile   Uses that certificate and key file. Both must be on the same file. Default is at current dir cert.pem.\n"
-         "  --pam pamname   Uses that pam name to allow access. Default login.\n"
+         "  --pam pamname   Uses that pam name to allow access. Default is to use computer login credentials.\n"
          "  --port N\n"
          "   -p N           Listens at given port. Default 8080\n"
          "  --listen ADDRESS\n"
@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
   onion_handler *root =
       onion_handler_new((void *)upload_file, (void *)&data, NULL);
   onion_handler *dir =
-      onion_handler_export_local_new(argc == 2 ? argv[1] : ".");
+      onion_handler_export_local_new(argc == 2 ? argv[1] : "/tmp/");
   onion_handler_export_local_set_footer(dir, upload_file_footer);
   onion_handler_add(dir,
                     onion_handler_static("<h1>404 - File not found.</h1>",
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
 
   o = onion_new(O_THREADED);
   onion_set_root_handler(o, pam);
-  onion_set_certificate(o, O_SSL_CERTIFICATE_KEY, certfile, certfile);
+//  onion_set_certificate(o, O_SSL_CERTIFICATE_KEY, certfile, certfile);
 
   onion_set_port(o, port);
   onion_set_hostname(o, hostname);

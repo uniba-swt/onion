@@ -2,6 +2,9 @@
 .*
 # some typical compilation directories
 build
+bin
 release
 debug
-
+obj-*
+debian/files
+debian/*.substvars

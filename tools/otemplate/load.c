@@ -21,6 +21,10 @@
   <http://www.apache.org/licenses/LICENSE-2.0>.
 */
 
+#if __APPLE__
+  #define _DARWIN_C_SOURCE
+#endif
+
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>

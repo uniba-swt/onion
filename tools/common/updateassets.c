@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <sys/types.h>
 #include <libgen.h>
 #include <stdarg.h>
 

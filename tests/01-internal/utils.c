@@ -31,6 +31,10 @@
 
 #include <onion/log.h>
 
+#ifndef SOCK_CLOEXEC
+#define SOCK_CLOEXEC 0
+#endif
+
 int connect_to(const char *addr, const char *port) {
   struct addrinfo hints;
   struct addrinfo *server;
