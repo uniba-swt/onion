@@ -40,6 +40,12 @@
 
 list *plugin_search_path;
 
+#if __APPLE__
+  const char dylib_extension[] = "dylib";
+#else
+  const char dylib_extension[] = "so";
+#endif
+
 int work(const char *infilename, const char *outfilename,
          onion_assets_file * assets);
 
@@ -66,7 +72,7 @@ int main(int argc, char **argv) {
         help("Missing templatedir name");
         return 3;
       }
-      snprintf(tmp, sizeof(tmp), "%s/lib%%s.dylib", argv[i]);
+      snprintf(tmp, sizeof(tmp), "%s/lib%%s.%s", argv[i], dylib_extension);
       ONION_DEBUG("Added templatedir %s", tmp);
       list_add(plugin_search_path, strdup(tmp));        // dup, remember to free later.
     } else if ((strcmp(argv[i], "--no-orig-lines") == 0)
@@ -107,30 +113,46 @@ int main(int argc, char **argv) {
   } else {
     char tmp2[256];
     strncpy(tmp2, argv[1], sizeof(tmp2) - 1);
-    snprintf(tmp, sizeof(tmp), "%s/lib%%s.dylib", dirname(tmp2));
+    snprintf(tmp, sizeof(tmp), "%s/lib%%s.%s", dirname(tmp2), dylib_extension);
     list_add(plugin_search_path, strdup(tmp));
     strncpy(tmp2, argv[1], sizeof(tmp2) - 1);
-    snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.dylib", dirname(tmp2));
+    snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.%s", dirname(tmp2), dylib_extension);
     list_add(plugin_search_path, strdup(tmp));
   }
 
   // Default template dirs
+#if __APPLE__
   list_add_with_flags(plugin_search_path, "lib%s.dylib", LIST_ITEM_NO_FREE);
   list_add_with_flags(plugin_search_path, "templatetags/lib%s.dylib",
                       LIST_ITEM_NO_FREE);
+#else
+  list_add_with_flags(plugin_search_path, "lib%s.so", LIST_ITEM_NO_FREE);
+  list_add_with_flags(plugin_search_path, "templatetags/lib%s.so",
+                      LIST_ITEM_NO_FREE);
+#endif
   char tmp2[256];
   strncpy(tmp2, argv[0], sizeof(tmp2) - 1);
-  snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.dylib", dirname(tmp2));
+  snprintf(tmp, sizeof(tmp), "%s/templatetags/lib%%s.%s", dirname(tmp2), dylib_extension);
   list_add(plugin_search_path, strdup(tmp));    // dupa is ok, as im at main.
   strncpy(tmp2, argv[0], sizeof(tmp2) - 1);
-  snprintf(tmp, sizeof(tmp), "%s/lib%%s.dylib", dirname(tmp2));
+  snprintf(tmp, sizeof(tmp), "%s/lib%%s.%s", dirname(tmp2), dylib_extension);
   list_add(plugin_search_path, strdup(tmp));    // dupa is ok, as im at main.
+
+#if __APPLE__
   list_add_with_flags(plugin_search_path,
                       "/usr/local/lib/otemplate/templatetags/lib%s.dylib",
                       LIST_ITEM_NO_FREE);
   list_add_with_flags(plugin_search_path,
                       "/usr/lib/otemplate/templatetags/lib%s.dylib",
                       LIST_ITEM_NO_FREE);
+#else
+  list_add_with_flags(plugin_search_path,
+                      "/usr/local/lib/otemplate/templatetags/lib%s.so",
+                      LIST_ITEM_NO_FREE);
+  list_add_with_flags(plugin_search_path,
+                      "/usr/lib/otemplate/templatetags/lib%s.so",
+                      LIST_ITEM_NO_FREE);
+#endif
 
   onion_assets_file *assetsfile = onion_assets_file_new(assetfilename);
   int error = work(infilename, outfilename, assetsfile);
